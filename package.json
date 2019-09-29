@@ -1,0 +1,20 @@
+{
+    "name": "tube-api",
+    "version": "1.0.0",
+    "description": "server-side code for react-tube",
+    "main": "app.js",
+    "scripts": {
+        "dev": "nodemon app.js"
+    },
+    "author": "brandon dionisio",
+    "license": "ISC",
+    "dependencies": {
+        "express": "^4.17.1",
+        "mongoose": "^5.7.1",
+        "passport": "^0.4.0"
+    },
+    "devDependencies": {
+        "body-parser": "^1.19.0",
+        "nodemon": "^1.19.3"
+    }
+}
