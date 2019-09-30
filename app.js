@@ -24,6 +24,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 // Routes
+app.use("/user", require("./routes/userRoutes"));
 
 app.listen(PORT, function() {
     console.log(`Server running on ${PORT}`);
