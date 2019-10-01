@@ -1,8 +1,35 @@
 const express = require("express");
 const router = express.Router();
+const { validateSignup } = require("../utils/validation");
 
 router.post("/signup", function(req, res) {
     // 1) Validate email, username, and password
+
+    const { username, email, password } = req.body;
+    const validationRes = validateSignup.validate({
+        username,
+        email,
+        password
+    });
+
+    if (
+        validationRes.error &&
+        validationRes.error.details &&
+        validationRes.error.details.length > 0
+    ) {
+        var errorMessages = validationRes.error.details.map(function(errorObj) {
+            return errorObj.message;
+        });
+
+        return res.json({
+            username,
+            email,
+            success: false,
+            data: {
+                errorMessages
+            }
+        });
+    }
 
     // 2) Check if both email and username are available
 
