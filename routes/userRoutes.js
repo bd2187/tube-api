@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const User = require("../models/userModel");
 const { validateSignup } = require("../utils/validation");
 
 router.post("/signup", function(req, res) {
@@ -31,6 +32,53 @@ router.post("/signup", function(req, res) {
         });
     }
 
+    User.findOne({ email })
+        .then(function(userEmail) {
+            if (userEmail) {
+                return res.json({
+                    success: false,
+                    data: {
+                        message: "email already exists"
+                    }
+                });
+            }
+
+            return User.findOne({ username });
+        })
+        .then(function(username) {
+            if (username) {
+                return res.json({
+                    sucess: false,
+                    data: {
+                        message: "username already exists"
+                    }
+                });
+            }
+
+            var newUser = new User({
+                username,
+                email,
+                password,
+                signUpDate: new Date().getTime()
+            });
+
+            return newUser.save();
+        })
+        .then(function(data) {
+            return res.json({
+                success: true,
+                data
+            });
+        })
+        .catch(function(err) {
+            return res.json({
+                success: false,
+                data: {
+                    err
+                }
+            });
+        });
+
     // 2) Check if both email and username are available
 
     // 3) Hash password
@@ -39,7 +87,7 @@ router.post("/signup", function(req, res) {
 
     // 5) Return token
 
-    return res.json({ test: "test", data: req.body });
+    // return res.json({ test: "test", data: req.body });
 });
 
 router.post("/signin", function(req, res) {
