@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const bcrypt = require("bcryptjs");
 const User = require("../models/userModel");
 const { validateSignup } = require("../utils/validation");
 
@@ -32,6 +33,7 @@ router.post("/signup", function(req, res) {
         });
     }
 
+    // 2) Check if both email and username are available
     User.findOne({ email })
         .then(function(userEmail) {
             if (userEmail) {
@@ -55,16 +57,26 @@ router.post("/signup", function(req, res) {
                 });
             }
 
+            return bcrypt.genSalt(10);
+        })
+        .then(function(salt) {
+            // 3) Hash password
+
+            return bcrypt.hash(password, salt);
+        })
+        .then(function(hash) {
             var newUser = new User({
                 username,
                 email,
-                password,
+                password: hash,
                 signUpDate: new Date().getTime()
             });
 
+            // 4) Save info to DB
             return newUser.save();
         })
         .then(function(data) {
+            // 5) Return token
             return res.json({
                 success: true,
                 data
@@ -78,16 +90,6 @@ router.post("/signup", function(req, res) {
                 }
             });
         });
-
-    // 2) Check if both email and username are available
-
-    // 3) Hash password
-
-    // 4) Save info to DB
-
-    // 5) Return token
-
-    // return res.json({ test: "test", data: req.body });
 });
 
 router.post("/signin", function(req, res) {
