@@ -10,6 +10,7 @@ const userSchema = new Schema({
 
 userSchema.pre("save", function(next) {
     // todo: create subscriptions and favorites arrays
+    next();
 });
 
 const User = mongoose.model("User", userSchema);
