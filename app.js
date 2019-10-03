@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
+const passport = require("passport");
 require("dotenv").config();
 
 const PORT = process.env.PORT || 5000;
@@ -22,6 +23,8 @@ db.once("open", function() {
 // Middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(passport.initialize());
+require("./config/passport")(passport);
 
 // Routes
 app.use("/user", require("./routes/userRoutes"));
