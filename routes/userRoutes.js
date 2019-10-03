@@ -1,10 +1,11 @@
 const express = require("express");
 const router = express.Router();
+const passport = require("passport");
 const { signUp } = require("../controllers/userController");
 
 router.post("/signup", signUp);
 
-router.post("/signin", function(req, res) {
+router.post("/signin", passport.authenticate("local"), function(req, res) {
     // 1) Validate email/username, and password
 
     // 2) Find email/username in DB
