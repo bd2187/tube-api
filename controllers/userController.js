@@ -1,10 +1,15 @@
 const bcrypt = require("bcryptjs");
 const User = require("../models/userModel");
 const { validateSignup } = require("../utils/validation");
+const createJWT = require("../utils/createJWT");
 
+/**
+ * Validates email, usernam and password prior to saving
+ * the user the DB. If validation passes, JWT is returned
+ * to the user
+ */
 const signUp = function signUp(req, res) {
     // 1) Validate email, username, and password
-
     const { username, email, password } = req.body;
     const validationRes = validateSignup.validate({
         username,
@@ -81,9 +86,12 @@ const signUp = function signUp(req, res) {
         })
         .then(function(data) {
             // 5) Return token
+            const token = createJWT(email, username);
             return res.json({
                 success: true,
-                data
+                data: {
+                    token
+                }
             });
         })
         .catch(function(err) {
