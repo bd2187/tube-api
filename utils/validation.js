@@ -11,4 +11,10 @@ const validateSignup = Joi.object({
     password: Joi.string().pattern(/^[a-zA-Z0-9]{7,30}$/)
 });
 
+const validateSignin = Joi.object({
+    email: Joi.string().email()
+});
+
 module.exports.validateSignup = validateSignup;
+
+module.exports.validateSignin = validateSignin;
