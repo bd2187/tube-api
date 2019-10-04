@@ -1,20 +1,22 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const { signUp } = require("../controllers/userController");
+const { signUp, signIn } = require("../controllers/userController");
 
 router.post("/signup", signUp);
 
-router.post("/signin", passport.authenticate("local"), function(req, res) {
-    // 1) Validate email/username, and password
+router.post("/signin", signIn);
 
-    // 2) Find email/username in DB
-    // - validate password
+// router.post("/signin", passport.authenticate("local"), function(req, res) {
+//     // 1) Validate email/username, and password
 
-    // 3) Return token
+//     // 2) Find email/username in DB
+//     // - validate password
 
-    return res.json({ test: "test", data: req.body });
-});
+//     // 3) Return token
+
+//     return res.json({ test: "test", data: req.body });
+// });
 
 router.post("/delete", function(req, res) {
     // 1) Validate email, username, and password
