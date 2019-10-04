@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 const User = require("../models/userModel");
-const { validateSignup } = require("../utils/validation");
+const { validateSignup, validateSignin } = require("../utils/validation");
 const createJWT = require("../utils/createJWT");
 
 /**
@@ -102,6 +102,63 @@ const signUp = function signUp(req, res) {
         });
 };
 
+const signIn = function(req, res) {
+    // 1) Validate email and password
+    const { email, password } = req.body;
+    const validationRes = validateSignin.validate({
+        email
+    });
+
+    if (
+        validationRes.error &&
+        validationRes.error.details &&
+        validationRes.error.details.length > 0
+    ) {
+        var errorMessages = validationRes.error.details.map(function(errorObj) {
+            return errorObj.message;
+        });
+
+        return res.json({
+            email,
+            success: false,
+            data: {
+                errorMessages
+            }
+        });
+    }
+
+    User.findOne({ email })
+        .then(function(userEmail) {
+            if (!userEmail) {
+                throw {
+                    message: "email not found"
+                };
+            }
+
+            return bcrypt.compare(password, userEmail.password);
+        })
+        .then(function(isPasswordValid) {
+            if (!isPasswordValid) {
+                throw {
+                    message: "password invalid"
+                };
+            }
+
+            return res.json({
+                success: true,
+                data: isPasswordValid
+            });
+        })
+        .catch(function(err) {
+            console.log(err);
+            return res.json({
+                success: false,
+                data: err
+            });
+        });
+};
+
 module.exports = {
-    signUp
+    signUp,
+    signIn
 };
