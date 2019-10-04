@@ -86,7 +86,7 @@ const signUp = function signUp(req, res) {
         })
         .then(function(data) {
             // 5) Return token
-            const token = createJWT(email, username);
+            const token = createJWT(email, username, data._id);
             return res.json({
                 success: true,
                 data: {
@@ -127,15 +127,19 @@ const signIn = function(req, res) {
         });
     }
 
+    var username = "";
+    var id = "";
     User.findOne({ email })
-        .then(function(userEmail) {
-            if (!userEmail) {
+        .then(function(user) {
+            if (!user) {
                 throw {
                     message: "email not found"
                 };
             }
 
-            return bcrypt.compare(password, userEmail.password);
+            username = user.username;
+            id = user._id;
+            return bcrypt.compare(password, user.password);
         })
         .then(function(isPasswordValid) {
             if (!isPasswordValid) {
@@ -144,13 +148,14 @@ const signIn = function(req, res) {
                 };
             }
 
+            const token = createJWT(email, username, id);
+
             return res.json({
                 success: true,
-                data: isPasswordValid
+                data: { token }
             });
         })
         .catch(function(err) {
-            console.log(err);
             return res.json({
                 success: false,
                 data: err
