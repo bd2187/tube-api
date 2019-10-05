@@ -28,6 +28,7 @@ require("./config/passport")(passport);
 
 // Routes
 app.use("/user", require("./routes/userRoutes"));
+app.use("/favorites", require("./routes/favoriteRoutes"));
 
 app.listen(PORT, function() {
     console.log(`Server running on ${PORT}`);
