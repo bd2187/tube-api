@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const User = require("../models/userModel");
+const passport = require("passport");
 const { validateSignup, validateSignin } = require("../utils/validation");
 const createJWT = require("../utils/createJWT");
 
@@ -8,6 +9,7 @@ const createJWT = require("../utils/createJWT");
  * the user the DB. If validation passes, JWT is returned
  * to the user
  */
+
 const signUp = function signUp(req, res) {
     // 1) Validate email, username, and password
     const { username, email, password } = req.body;
@@ -102,9 +104,8 @@ const signUp = function signUp(req, res) {
         });
 };
 
-const signIn = function(req, res) {
-    // 1) Validate email and password
-    const { email, password } = req.body;
+const signIn = function(req, res, next) {
+    const { email } = req.body;
     const validationRes = validateSignin.validate({
         email
     });
@@ -127,40 +128,36 @@ const signIn = function(req, res) {
         });
     }
 
-    var username = "";
-    var id = "";
-    User.findOne({ email })
-        .then(function(user) {
-            if (!user) {
-                throw {
-                    message: "email not found"
-                };
-            }
-
-            username = user.username;
-            id = user._id;
-            return bcrypt.compare(password, user.password);
-        })
-        .then(function(isPasswordValid) {
-            if (!isPasswordValid) {
-                throw {
-                    message: "password invalid"
-                };
-            }
-
-            const token = createJWT(email, username, id);
-
-            return res.json({
-                success: true,
-                data: { token }
-            });
-        })
-        .catch(function(err) {
+    passport.authenticate("login", function(err, user, info) {
+        if (err) {
             return res.json({
                 success: false,
-                data: err
+                data: {
+                    message: "there was an error with logging in"
+                }
             });
-        });
+        }
+
+        if (info) {
+            return res.json({
+                success: false,
+                data: {
+                    message: info.message
+                }
+            });
+        }
+
+        if (user) {
+            const { email, username, _id } = user;
+            const token = createJWT(email, username, _id);
+            return res.json({
+                success: true,
+                data: {
+                    token
+                }
+            });
+        }
+    })(req, res, next);
 };
 
 module.exports = {
