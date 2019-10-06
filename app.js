@@ -20,11 +20,13 @@ db.once("open", function() {
     console.log("connected to db");
 });
 
+require("./config/passport");
+
 // Middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(passport.initialize());
-require("./config/passport")(passport);
+app.use(passport.session());
 
 // Routes
 app.use("/user", require("./routes/userRoutes"));
