@@ -1,4 +1,5 @@
 const User = require("../models/userModel");
+const passport = require("passport");
 const { validateFavoriteVideo } = require("../utils/validation");
 
 /**
@@ -42,11 +43,9 @@ const fetchFavoriteVideos = function(req, res) {
  * 3) If the favoriteVideo doesn't exists in the user's favorites, add
  * the video their favorites
  */
-const addFavoriteVideo = function(req, res) {
-    var { userID, favoriteVideo } = req.body;
-
+const addFavoriteVideo = function(req, res, next) {
+    var { favoriteVideo } = req.body;
     favoriteVideo = { ...favoriteVideo, dateAdded: new Date().getTime() };
-
     const isFavoriteValid = validateFavoriteVideo.validate(favoriteVideo);
 
     if (
@@ -69,50 +68,72 @@ const addFavoriteVideo = function(req, res) {
         });
     }
 
-    User.findById(userID)
-        .then(function(user) {
-            if (!user) {
-                throw {
-                    message: "user not found"
-                };
-            }
-
-            // check if favorite video already exists in user's favorites
-            const existingFavorites = user.favorites;
-
-            for (let i = 0; i < existingFavorites.length; i++) {
-                let { videoID } = existingFavorites[i];
-
-                if (videoID === favoriteVideo.videoID) {
-                    throw {
-                        message: "video is already favorited by user"
-                    };
-                }
-            }
-
-            const updatedFavorites = [...user.favorites, favoriteVideo];
-
-            return User.findOneAndUpdate(
-                { _id: userID },
-                { favorites: updatedFavorites },
-                { new: true }
-            );
-        })
-        .then(function(data) {
-            return res.json({
-                success: true,
-                data: {
-                    message: "successfully saved favorite",
-                    data: data.favorites
-                }
-            });
-        })
-        .catch(function(err) {
+    passport.authenticate("jwt", { session: false }, function(err, user, info) {
+        if (err) {
             return res.json({
                 success: false,
-                data: err
+                data: {
+                    message: "there was an issue with favoriting this video"
+                }
             });
-        });
+        }
+
+        if (info) {
+            return res.json({
+                success: false,
+                data: {
+                    message: info.message
+                }
+            });
+        }
+
+        const { _id: userID } = user;
+
+        User.findById(userID)
+            .then(function(user) {
+                if (!user) {
+                    throw {
+                        message: "user not found"
+                    };
+                }
+
+                // check if favorite video already exists in user's favorites
+                const existingFavorites = user.favorites;
+
+                for (let i = 0; i < existingFavorites.length; i++) {
+                    let { videoID } = existingFavorites[i];
+
+                    if (videoID === favoriteVideo.videoID) {
+                        throw {
+                            message: "video is already favorited by user"
+                        };
+                    }
+                }
+
+                const updatedFavorites = [...user.favorites, favoriteVideo];
+
+                return User.findOneAndUpdate(
+                    { _id: userID },
+                    { favorites: updatedFavorites },
+                    { new: true }
+                );
+            })
+            .then(function(data) {
+                return res.json({
+                    success: true,
+                    data: {
+                        message: "successfully saved favorite",
+                        data: data.favorites
+                    }
+                });
+            })
+            .catch(function(err) {
+                return res.json({
+                    success: false,
+                    data: err
+                });
+            });
+    })(req, res, next);
 };
 
 module.exports = {
