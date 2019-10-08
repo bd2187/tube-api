@@ -15,7 +15,7 @@ module.exports = function(email, username, userID) {
         username,
         userID,
         iat: currentTime,
-        exp: currentTime + 86400000 // 24 hour expiration date
+        expiresIn: currentTime + 86400000 // 24 hour expiration date
     };
 
     return jwt.sign(options, "123secret", { algorithm: "HS256" });
