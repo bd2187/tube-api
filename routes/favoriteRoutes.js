@@ -2,14 +2,14 @@ const express = require("express");
 const router = express.Router();
 const {
     fetchFavoriteVideos,
-    addFavoriteVideo
+    addFavoriteVideo,
+    removeFavoriteVideo
 } = require("../controllers/favoriteController");
-const passport = require("passport");
 
 router.get("/all/:userID", fetchFavoriteVideos);
 
 router.post("/add/video", addFavoriteVideo);
 
-router.delete("/remove/video", (req, res) => {});
+router.delete("/remove/video", removeFavoriteVideo);
 
 module.exports = router;
