@@ -1,15 +1,7 @@
 const User = require("../models/userModel");
 const passport = require("passport");
+const generateErrMsg = require("../utils/generateErrMsg");
 const { validateFavoriteVideo } = require("../utils/validation");
-
-const generatePassportErr = function(message) {
-    return {
-        success: false,
-        data: {
-            message
-        }
-    };
-};
 
 /**
  *  Returns  user's favorites
@@ -80,14 +72,12 @@ const addFavoriteVideo = function(req, res, next) {
     passport.authenticate("jwt", { session: false }, function(err, user, info) {
         if (err) {
             return res.json(
-                generatePassportErr(
-                    "there was an issue with favoriting this video"
-                )
+                generateErrMsg("there was an issue with favoriting this video")
             );
         }
 
         if (info) {
-            return res.json(generatePassportErr(info.message));
+            return res.json(generateErrMsg(info.message));
         }
 
         const { _id: userID } = user;
